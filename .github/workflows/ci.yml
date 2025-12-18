@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+
+jobs:
+  build-windows:
+    name: Build on Windows (Qt 6, MinGW)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install Qt 6 (MinGW)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.9.2
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          modules: qtserialport
+          cache: true
+
+      - name: Configure (CMake + Ninja)
+        shell: bash
+        run: |
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$Qt6_DIR"
+
+      - name: Build
+        shell: bash
+        run: |
+          cmake --build build --target appvalve-tuner
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appvalve-tuner-windows
+          path: |
+            build/appvalve-tuner.exe
+          if-no-files-found: error
