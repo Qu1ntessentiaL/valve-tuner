@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.16)
 project(valve-tuner VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(Qt6_DIR C:/Qt/6.9.2/mingw_64/lib/cmake/Qt6)
 
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick SerialPort)
 
@@ -41,6 +40,21 @@ target_link_libraries(appvalve-tuner PRIVATE
         Qt6::Quick
         Qt6::SerialPort
 )
+
+if(WIN32)
+    get_filename_component(QT_ROOT "${Qt6_DIR}/../../.." ABSOLUTE)
+
+    add_custom_command(TARGET appvalve-tuner POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E env
+            "QT_PLUGIN_PATH=${QT_ROOT}/plugins"
+            "QT_QPA_PLATFORM_PLUGIN_PATH=${QT_ROOT}/plugins/platforms"
+            "PATH=${QT_ROOT}/bin"
+            "${QT_ROOT}/bin/windeployqt.exe"
+            --no-translations
+            "$<TARGET_FILE:appvalve-tuner>"
+            COMMENT "Running windeployqt after build"
+    )
+endif()
 
 include(GNUInstallDirs)
 install(TARGETS appvalve-tuner

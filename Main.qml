@@ -19,12 +19,19 @@ ApplicationWindow {
             Label {
                 text: qsTr("Port")
             }
-            TextField {
-                id: portField
+            ComboBox {
+                id: portCombo
                 Layout.fillWidth: true
-                placeholderText: qsTr("COM3")
-                text: controller.portName
-                onTextChanged: controller.portName = text
+                editable: true
+
+                // список доступных COM-портов из C++
+                model: controller.availablePorts
+
+                // выбор из списка
+                onCurrentTextChanged: controller.portName = currentText
+                // ручной ввод
+                onEditTextChanged: controller.portName = editText
+
             }
             Button {
                 text: controller.connected ? qsTr("Disconnect") : qsTr("Connect")

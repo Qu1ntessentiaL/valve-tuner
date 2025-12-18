@@ -1,17 +1,17 @@
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#pragma once
 
 #include <QObject>
 #include <QTimer>
+#include <QStringList>
 
 #include "SendandReadData.h"
 #include "Insufflator.h"
 
-class Controller : public QObject
-{
+class Controller : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(QString portName READ portName WRITE setPortName NOTIFY portNameChanged)
+    Q_PROPERTY(QStringList availablePorts READ availablePorts NOTIFY availablePortsChanged)
     Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
 
@@ -35,6 +35,8 @@ public:
     QString portName() const { return m_portName; }
     void setPortName(const QString &name);
 
+    QStringList availablePorts() const { return m_availablePorts; }
+
     bool isConnected() const { return m_connected; }
     bool isRunning() const { return m_running; }
 
@@ -53,18 +55,27 @@ public:
     QString logText() const { return m_logText; }
 
     Q_INVOKABLE void connectOrDisconnect();
+
     Q_INVOKABLE void startOrStop();
+
+    Q_INVOKABLE void refreshPorts();
 
 signals:
     void portNameChanged();
+    void availablePortsChanged();
+
     void connectedChanged();
+
     void runningChanged();
 
     void valuesChanged();
+
     void calibrationChanged();
+
     void resultChanged();
 
     void logTextChanged();
+
     void errorOccurred(const QString &message);
 
 private slots:
@@ -72,6 +83,7 @@ private slots:
 
 private:
     void appendLog(const QString &line);
+
     void resetMeasurement();
 
     QString m_portName;
@@ -79,6 +91,7 @@ private:
     bool m_running = false;
 
     QTimer m_timer;
+    QTimer m_portsTimer;
 
     Data *m_data = nullptr;
     insufflator *m_in = nullptr;
@@ -94,8 +107,6 @@ private:
     int m_offset = 0;
 
     QString m_logText;
+
+    QStringList m_availablePorts;
 };
-
-#endif // CONTROLLER_H
-
-

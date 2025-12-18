@@ -1,32 +1,52 @@
 #include "Controller.h"
 
 #include <QDebug>
+#include <QSerialPortInfo>
 
 Controller::Controller(QObject *parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
     m_timer.setInterval(100);
     connect(&m_timer, &QTimer::timeout, this, &Controller::updateInsufflatorData);
+
+    // Таймер автосканирования COM-портов
+    m_portsTimer.setInterval(1000);
+    connect(&m_portsTimer, &QTimer::timeout, this, &Controller::refreshPorts);
+    m_portsTimer.start();
+
+    // Первичное наполнение списка портов
+    refreshPorts();
 }
 
-void Controller::setPortName(const QString &name)
-{
+void Controller::setPortName(const QString &name) {
     if (m_portName == name)
         return;
     m_portName = name;
     emit portNameChanged();
 }
 
-void Controller::appendLog(const QString &line)
-{
+void Controller::refreshPorts() {
+    QStringList ports;
+    const auto available = QSerialPortInfo::availablePorts();
+    ports.reserve(available.size());
+    for (const QSerialPortInfo &info : available) {
+        ports.push_back(info.portName());
+    }
+
+    if (ports == m_availablePorts)
+        return;
+
+    m_availablePorts = ports;
+    emit availablePortsChanged();
+}
+
+void Controller::appendLog(const QString &line) {
     if (!m_logText.isEmpty())
         m_logText.append('\n');
     m_logText.append(line);
     emit logTextChanged();
 }
 
-void Controller::resetMeasurement()
-{
+void Controller::resetMeasurement() {
     m_inValue = insufflator::INValue{};
     m_flowTarget = 2.0;
     m_slope = 0.0;
@@ -35,8 +55,7 @@ void Controller::resetMeasurement()
     emit resultChanged();
 }
 
-void Controller::connectOrDisconnect()
-{
+void Controller::connectOrDisconnect() {
     if (!m_connected) {
         if (m_portName.isEmpty()) {
             emit errorOccurred(tr("Port name is empty"));
@@ -57,6 +76,9 @@ void Controller::connectOrDisconnect()
         m_connected = true;
         appendLog(tr("Connected to %1").arg(m_portName));
         emit connectedChanged();
+
+        // при подключении можно остановить автосканирование портов
+        m_portsTimer.stop();
     } else {
         m_timer.stop();
         m_running = false;
@@ -77,11 +99,14 @@ void Controller::connectOrDisconnect()
         m_connected = false;
         appendLog(tr("Disconnected"));
         emit connectedChanged();
+
+        // при отключении снова начинаем сканировать порты
+        if (!m_portsTimer.isActive())
+            m_portsTimer.start();
     }
 }
 
-void Controller::startOrStop()
-{
+void Controller::startOrStop() {
     if (!m_connected) {
         emit errorOccurred(tr("Connect to the device first"));
         return;
@@ -105,8 +130,7 @@ void Controller::startOrStop()
     }
 }
 
-void Controller::updateInsufflatorData()
-{
+void Controller::updateInsufflatorData() {
     if (!m_data)
         return;
 
@@ -123,8 +147,8 @@ void Controller::updateInsufflatorData()
                 m_inValue.FLOW1 = m_flow;
                 m_flowTarget = 20.0;
                 appendLog(tr("Point 1: PWM=%1, FLOW=%2")
-                              .arg(m_inValue.PWM1)
-                              .arg(m_inValue.FLOW1, 0, 'f', 3));
+                    .arg(m_inValue.PWM1)
+                    .arg(m_inValue.FLOW1, 0, 'f', 3));
                 delete m_in;
                 m_in = nullptr;
                 emit calibrationChanged();
@@ -145,8 +169,8 @@ void Controller::updateInsufflatorData()
                 m_inValue.FLOW2 = m_flow;
                 m_flowTarget = 0.0;
                 appendLog(tr("Point 2: PWM=%1, FLOW=%2")
-                              .arg(m_inValue.PWM2)
-                              .arg(m_inValue.FLOW2, 0, 'f', 3));
+                    .arg(m_inValue.PWM2)
+                    .arg(m_inValue.FLOW2, 0, 'f', 3));
                 delete m_in;
                 m_in = nullptr;
                 emit calibrationChanged();
@@ -162,13 +186,11 @@ void Controller::updateInsufflatorData()
         emit resultChanged();
 
         appendLog(tr("Approximation: slope=%1, offset=%2")
-                      .arg(m_slope, 0, 'f', 2)
-                      .arg(m_offset));
+            .arg(m_slope, 0, 'f', 2)
+            .arg(m_offset));
 
         m_timer.stop();
         m_running = false;
         emit runningChanged();
     }
 }
-
-

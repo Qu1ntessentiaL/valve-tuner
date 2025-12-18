@@ -5,7 +5,7 @@
 build
 cmake-build-*
 
-src/widget.*
+.qtcreator
 
 *~
 *.autosave

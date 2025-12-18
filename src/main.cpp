@@ -14,16 +14,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(
         QStringLiteral("controller"), &controller);
 
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() {
-            qCritical() << "QML object creation failed";
-            QCoreApplication::exit(-1);
-        },
-        Qt::QueuedConnection);
-
+    // Убираем жёсткий выход по objectCreationFailed, чтобы не получать -1
     engine.loadFromModule("ValveTuner", "Main");
 
     return app.exec();
