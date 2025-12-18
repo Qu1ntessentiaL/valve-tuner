@@ -5,9 +5,12 @@ import QtQuick.Layouts 1.15
 ApplicationWindow {
     id: root
     visible: true
-    width: 840
-    height: 600
+    width: 960
+    height: 640
     title: qsTr("Valve tuner")
+    color: "#20232a"
+    font.family: "Segoe UI"
+    font.pixelSize: 18
 
     ColumnLayout {
         anchors.fill: parent
@@ -18,11 +21,14 @@ ApplicationWindow {
             Layout.fillWidth: true
             Label {
                 text: qsTr("Port")
+                color: "#ffffff"
             }
             ComboBox {
                 id: portCombo
                 Layout.fillWidth: true
                 editable: true
+                implicitHeight: 40
+                font.pixelSize: 16
 
                 // список доступных COM-портов из C++
                 model: controller.availablePorts
@@ -35,95 +41,151 @@ ApplicationWindow {
             }
             Button {
                 text: controller.connected ? qsTr("Disconnect") : qsTr("Connect")
+                Layout.preferredWidth: 150
+                implicitHeight: 40
+                font.pixelSize: 16
                 onClicked: controller.connectOrDisconnect()
             }
         }
 
         Button {
-            Layout.alignment: Qt.AlignLeft
+            Layout.alignment: Qt.AlignHCenter
             text: controller.running ? qsTr("Stop") : qsTr("Start")
             enabled: controller.connected
+            Layout.preferredWidth: 200
+            implicitHeight: 48
+            font.pixelSize: 20
             onClicked: controller.startOrStop()
         }
 
-        RowLayout {
+        Frame {
             Layout.fillWidth: true
-
-            Label { text: qsTr("PWM") }
-            Label {
-                Layout.minimumWidth: 80
-                text: controller.pwm
-            }
-
-            Label { text: qsTr("FLOW") }
-            Label {
-                Layout.minimumWidth: 80
-                text: Number(controller.flow).toFixed(3)
-            }
-
-            Label { text: qsTr("error") }
-            Label {
-                Layout.minimumWidth: 80
-                text: Number(controller.error).toFixed(3)
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            ColumnLayout {
-                Label { text: qsTr("PWM 1") }
-                Label { text: qsTr("FLOW 1") }
-            }
-
-            ColumnLayout {
-                Label { text: controller.pwm1 }
-                Label { text: Number(controller.flow1).toFixed(3) }
-            }
-
-            ColumnLayout {
-                Label { text: qsTr("PWM 2") }
-                Label { text: qsTr("FLOW 2") }
-            }
-
-            ColumnLayout {
-                Label { text: controller.pwm2 }
-                Label { text: Number(controller.flow2).toFixed(3) }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-
-            Label {
-                Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Result approximation")
-                font.bold: true
+            Layout.preferredHeight: 140
+            background: Rectangle {
+                color: "#282c34"
+                radius: 8
             }
 
             RowLayout {
-                Layout.fillWidth: true
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 40
 
-                Label { text: qsTr("Slope") }
-                Label {
-                    Layout.minimumWidth: 100
-                    text: controller.slope ? Number(controller.slope).toFixed(2) : "-"
+                ColumnLayout {
+                    spacing: 4
+                    Label { text: qsTr("PWM"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 80
+                        text: controller.pwm
+                        color: "#ffffff"
+                        font.bold: true
+                    }
                 }
 
-                Label { text: qsTr("Offset") }
-                Label {
-                    Layout.minimumWidth: 100
-                    text: controller.offset ? controller.offset : "-"
+                ColumnLayout {
+                    spacing: 4
+                    Label { text: qsTr("FLOW"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 80
+                        text: Number(controller.flow).toFixed(3)
+                        color: "#ffffff"
+                        font.bold: true
+                    }
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Label { text: qsTr("Error"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 80
+                        text: Number(controller.error).toFixed(3)
+                        color: "#ffffff"
+                        font.bold: true
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                ColumnLayout {
+                    spacing: 4
+                    Label { text: qsTr("PWM 1 / FLOW 1"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 120
+                        text: qsTr("%1 / %2").arg(controller.pwm1).arg(Number(controller.flow1).toFixed(3))
+                        color: "#ffffff"
+                    }
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Label { text: qsTr("PWM 2 / FLOW 2"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 120
+                        text: qsTr("%1 / %2").arg(controller.pwm2).arg(Number(controller.flow2).toFixed(3))
+                        color: "#ffffff"
+                    }
                 }
             }
         }
 
-        Label { text: qsTr("Log") }
+        Frame {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 100
+            background: Rectangle {
+                color: "#282c34"
+                radius: 8
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 8
+
+                Label {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: qsTr("Result approximation")
+                    font.bold: true
+                    font.pixelSize: 20
+                    color: "#ffffff"
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 24
+
+                    Label { text: qsTr("Slope"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 120
+                        text: controller.slope ? Number(controller.slope).toFixed(2) : "-"
+                        color: "#ffffff"
+                        font.bold: true
+                    }
+
+                    Label { text: qsTr("Offset"); color: "#bbbbbb" }
+                    Label {
+                        Layout.minimumWidth: 120
+                        text: controller.offset ? controller.offset : "-"
+                        color: "#ffffff"
+                        font.bold: true
+                    }
+
+                    Item { Layout.fillWidth: true }
+                }
+            }
+        }
+
+        Label {
+            text: qsTr("Log")
+            color: "#ffffff"
+        }
         TextArea {
             Layout.fillWidth: true
             Layout.fillHeight: true
             readOnly: true
             text: controller.logText
+            font.pixelSize: 16
+            color: "#e0e0e0"
+            wrapMode: TextArea.NoWrap
         }
     }
 

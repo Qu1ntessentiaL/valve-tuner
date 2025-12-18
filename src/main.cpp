@@ -4,8 +4,7 @@
 
 #include "Controller.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     Controller controller;
@@ -14,7 +13,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(
         QStringLiteral("controller"), &controller);
 
-    // Убираем жёсткий выход по objectCreationFailed, чтобы не получать -1
     engine.loadFromModule("ValveTuner", "Main");
 
     return app.exec();

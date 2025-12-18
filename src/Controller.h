@@ -1,10 +1,8 @@
 #pragma once
 
-#include <QObject>
 #include <QTimer>
-#include <QStringList>
 
-#include "SendandReadData.h"
+#include "SendAndReadData.h"
 #include "Insufflator.h"
 
 class Controller : public QObject {
@@ -33,6 +31,7 @@ public:
     explicit Controller(QObject *parent = nullptr);
 
     QString portName() const { return m_portName; }
+
     void setPortName(const QString &name);
 
     QStringList availablePorts() const { return m_availablePorts; }
@@ -62,6 +61,7 @@ public:
 
 signals:
     void portNameChanged();
+
     void availablePortsChanged();
 
     void connectedChanged();
@@ -94,8 +94,8 @@ private:
     QTimer m_portsTimer;
 
     Data *m_data = nullptr;
-    insufflator *m_in = nullptr;
-    insufflator::INValue m_inValue{};
+    Insufflator *m_in = nullptr;
+    Insufflator::INValue m_inValue{};
 
     double m_flowTarget = 2.0;
 

@@ -1,6 +1,5 @@
 #include "Controller.h"
 
-#include <QDebug>
 #include <QSerialPortInfo>
 
 Controller::Controller(QObject *parent)
@@ -28,7 +27,7 @@ void Controller::refreshPorts() {
     QStringList ports;
     const auto available = QSerialPortInfo::availablePorts();
     ports.reserve(available.size());
-    for (const QSerialPortInfo &info : available) {
+    for (const QSerialPortInfo &info: available) {
         ports.push_back(info.portName());
     }
 
@@ -47,7 +46,7 @@ void Controller::appendLog(const QString &line) {
 }
 
 void Controller::resetMeasurement() {
-    m_inValue = insufflator::INValue{};
+    m_inValue = Insufflator::INValue{};
     m_flowTarget = 2.0;
     m_slope = 0.0;
     m_offset = 0;
@@ -154,7 +153,7 @@ void Controller::updateInsufflatorData() {
                 emit calibrationChanged();
             }
         } else {
-            m_in = new insufflator(m_data, m_flowTarget);
+            m_in = new Insufflator(m_data, m_flowTarget);
         }
     } else if (m_flowTarget == 20.0) {
         if (m_in != nullptr) {
@@ -176,11 +175,11 @@ void Controller::updateInsufflatorData() {
                 emit calibrationChanged();
             }
         } else {
-            m_in = new insufflator(m_data, m_flowTarget);
+            m_in = new Insufflator(m_data, m_flowTarget);
         }
     } else if ((m_inValue.PWM1 > 0) && (m_inValue.PWM2 > 0) &&
                (m_inValue.FLOW1 > 0.0) && (m_inValue.FLOW2 > 0.0)) {
-        auto res = insufflator::approximate(m_inValue);
+        auto res = Insufflator::approximate(m_inValue);
         m_slope = res.slope;
         m_offset = res.offset;
         emit resultChanged();
