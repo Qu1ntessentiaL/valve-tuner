@@ -19,7 +19,7 @@
  * в текстовый файл.
  */
 class UART {
-    QSerialPort serialPort;
+    QSerialPort m_serialPort;
 
 public:
     /**
@@ -28,12 +28,12 @@ public:
      * @param BaudRate Скорость обмена (по умолчанию 115200 бод).
      */
     UART(const QString &Portname, qint32 BaudRate = QSerialPort::Baud115200) {
-        serialPort.setPortName(Portname);
-        serialPort.setBaudRate(BaudRate);
-        serialPort.setFlowControl(QSerialPort::NoFlowControl);
-        serialPort.setDataBits(QSerialPort::Data8);
-        serialPort.setRequestToSend(true);
-        serialPort.setDataTerminalReady(true);
+        m_serialPort.setPortName(Portname);
+        m_serialPort.setBaudRate(BaudRate);
+        m_serialPort.setFlowControl(QSerialPort::NoFlowControl);
+        m_serialPort.setDataBits(QSerialPort::Data8);
+        m_serialPort.setRequestToSend(true);
+        m_serialPort.setDataTerminalReady(true);
     };
 
     /**
@@ -42,7 +42,7 @@ public:
      * @return @c true при успешном открытии, @c false при ошибке.
      */
     bool initUART(QSerialPort::OpenMode mode = QIODevice::ReadWrite) {
-        return serialPort.open(mode);
+        return m_serialPort.open(mode);
     }
 
     /**
@@ -50,8 +50,8 @@ public:
      * @param data Буфер, который необходимо отправить.
      */
     void transmitUART(QByteArray &data) {
-        serialPort.write(data);
-        serialPort.waitForBytesWritten(100);
+        m_serialPort.write(data);
+        m_serialPort.waitForBytesWritten(100);
         logUARTData("WRITING", data);
     }
 
@@ -72,8 +72,8 @@ public:
         timer.start();
 
         while (timer.elapsed() < MAX_WAIT_MS && data.size() < PACKET_SIZE) {
-            if (serialPort.waitForReadyRead(1000)) {
-                data.append(serialPort.readAll());
+            if (m_serialPort.waitForReadyRead(1000)) {
+                data.append(m_serialPort.readAll());
                 //data = serialPort.readAll();
                 logUARTData("READING", data);
             }
@@ -89,7 +89,7 @@ public:
      * @brief Закрывает последовательный порт.
      */
     void closeUART() {
-        serialPort.close();
+        m_serialPort.close();
     }
 
     /**

@@ -11,7 +11,6 @@ qt_standard_project_setup(REQUIRES 6.9)
 qt_add_executable(appvalve-tuner
         src/main.cpp
         src/Controller.cpp
-        src/CRC.cpp
 )
 
 target_include_directories(appvalve-tuner PRIVATE

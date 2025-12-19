@@ -6,7 +6,7 @@ namespace KEYS {
     enum Orders {
         GET_VERSION = 1,
         PRESS_KEY = 0x10,
-        KEY_SIG = 0x12, // low byte: KEY_xxx_SIG, high byte: UI::Flags
+        KEY_SIG = 0x12,   // low byte: KEY_xxx_SIG, high byte: UI::Flags
     };
 }
 

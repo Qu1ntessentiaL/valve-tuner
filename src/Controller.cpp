@@ -61,7 +61,7 @@ void Controller::connectOrDisconnect() {
             return;
         }
 
-        // global uart lives in this translation unit (see SendandReadData.h)
+        // global uart lives in this translation unit (see SendAndReadData.h)
         uart = new UART(m_portName);
         if (!uart->initUART()) {
             delete uart;

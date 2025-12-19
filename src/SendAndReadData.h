@@ -6,7 +6,6 @@
 #pragma once
 
 #include "USART.h"
-#include "CRC.h"
 
 /// Глобальный указатель на UART, используемый классами @ref Data и @ref Controller.
 static UART *uart = nullptr;
@@ -20,15 +19,29 @@ static UART *uart = nullptr;
  *  - удобные методы @ref SendData и @ref RecieveData для кода алгоритма.
  */
 class Data : public UART {
-    CRC8 crc;
-
     /// Специальные байты, используемые в кадрирующем протоколе.
     enum {
-        FEND = 0xC0,  ///< Frame End.
-        FESC = 0xDB,  ///< Frame Escape.
+        FEND = 0xC0, ///< Frame End.
+        FESC = 0xDB, ///< Frame Escape.
         TFEND = 0xDC, ///< Transposed Frame End.
         TFESC = 0xDD, ///< Transposed Frame Escape.
     };
+
+    static unsigned char CRC_calc(const unsigned char *buffer, unsigned int len) {
+        unsigned char crc = 0xDE;
+        while (len--) {
+            crc ^= *buffer++;
+
+            for (uint8_t i = 0; i < 8; i++)
+                crc = (crc & 1) ? (crc >> 1) ^ 0x8c : crc >> 1;
+        }
+        return crc;
+    }
+
+    static unsigned char CRC_calc(const QByteArray &data) {
+        return CRC_calc(reinterpret_cast<const unsigned char *>(data.constData()),
+                        static_cast<unsigned int>(data.size()));
+    }
 
 public:
     /**
@@ -60,7 +73,10 @@ public:
      * @param data2   Второй байт данных.
      * @param fend    Маркер начала/конца кадра (по умолчанию @c FEND).
      */
-    void SendData(unsigned char address, unsigned char command, unsigned char data1, unsigned char data2,
+    void SendData(unsigned char address,
+                  unsigned char command,
+                  unsigned char data1,
+                  unsigned char data2,
                   unsigned char fend = FEND) {
         QByteArray data;
         data.append(fend);
@@ -70,7 +86,7 @@ public:
         data.append(data2);
 
         QByteArray result;
-        unsigned char crcValue = crc.CRC_calc(data);
+        unsigned char crcValue = CRC_calc(data);
 
         QByteArray dataWithCRC = data;
         dataWithCRC.append(crcValue);
